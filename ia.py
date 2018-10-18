@@ -1,5 +1,5 @@
 import copy
-
+from search import *
 
 # TAI content
 def c_peg ():
@@ -110,61 +110,58 @@ def board_perform_move(board, move):
 	return board_new
 
 
+def board_is_goal(board):
+	if (board_num_pegs(board) <= 1):
+		return True
+	return False
+
+def board_num_pegs(board):
+	pegs = 0
+	for i in range(board_size_l(board)-1):
+		for j in range(board_size_c(board)-1):
+			if (is_peg(board_pos_cont(board, make_pos(i,j)))):
+				pegs+=1
+	return pegs
+
+
+def heuristic(board):
+	dist = 0
+	for i in range(board_size_l(board)-1):
+		for j in range(board_size_c(board)-1):
+			if (is_peg(board_pos_cont(board, make_pos(i,j)))):
+				dist += distance(make_pos(i,j), (0,0))
+	return dist
+
+
+
 class sol_state:
+	__slots__ = ['board']
 	def __init__(self, board):
-     self.board = board
+		self.board = board
 
 	def __lt__(self, other_sol_state):
-		#cancro ask sarmento 
+		return board_num_pegs(self.board) < board_num_pegs(other_sol_state.board)
+
+
 
 class solitaire(Problem):
- """Models a Solitaire problem as a satisfaction problem.
- A solution cannot have more than 1 peg left on the board."""
+	"""Models a Solitaire problem as a satisfaction problem.
+	A solution cannot have more than 1 peg left on the board."""
 	def __init__(self, board):
- 		"""The constructor specifies the initial state, and possibly a goal
-        state, if there is a unique goal.  Your subclass's constructor can add
-        other arguments."""
-        self.board = board
+		self.board = board
 
 	def actions(self, state):
- 	    """Return the actions that can be executed in the given
-        state. The result would typically be a list, but if there are
-        many actions, consider yielding them one at a time in an
-        iterator, rather than building them all at once."""
+		return board_moves(state.board)
 
 
 	def result(self, state, action):
-		"""Return the state that results from executing the given
-        action in the given state. The action must be one of
-        self.actions(state)."""
+		return board_perform_move(state.board, action)
 
 	def goal_test(self, state):
-		"""Return True if the state is a goal. The default method compares the
-        state to self.goal or checks for state in self.goal if it is a
-        list, as specified in the constructor. Override this method if
-        checking against a single self.goal is not enough."""
-
+		return board_is_goal(state.board)
 
 	def path_cost(self, c, state1, action, state2):
-		"""Return the cost of a solution path that arrives at state2 from
-        state1 via action, assuming cost c to get up to state1. If the problem
-        is such that the path doesn't matter, this function will only look at
-        state2.  If the path does matter, it will consider c and maybe state1
-        and action. The default method costs 1 for every step in the path."""
-        return c + 1
-
+		return c + 1
+	
 	def h(self, node):
- """Needed for informed search.""" 
-
-
-
-
-b1 = [["_","O","O","O","_"], ["O","_","O","_","O"], ["_","O","_","O","_"], ["O","_","O","_","_"], ["_","O","_","_","_"]] 
-
-print (board_moves(b1))
-
-bn = board_perform_move(b1, [(0, 2), (0, 0)]) 
-
-print (b1)
-print('\n')
-print  (bn)
+		return heuristic(node.state.board)
