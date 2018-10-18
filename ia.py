@@ -1,4 +1,5 @@
 import copy
+import math
 from search import *
 
 # TAI content
@@ -49,7 +50,7 @@ def move_final (move):
 	return move[1]
 
 def dif_move(move):
-	return (pos_l(move_final(move))-pos_l(move_initial(move)), pos_c(move_final(move))-pos_c(move_initial(move)))
+	return (pos_l(move_final(move)) - pos_l(move_initial(move)), pos_c(move_final(move)) - pos_c(move_initial(move)))
 
 
 # TAI board
@@ -74,7 +75,6 @@ def board_moves(board):
 	moves = []
 	for i in range(board_size_l(board)-1):
 		for j in range(board_size_c(board)-1):
-
 			pos_i = make_pos(i,j)
 			if board_is_peg(board, pos_i):
 				if (board_is_peg(board, lf_pos(pos_i)) and board_is_empty(board, lf_pos(lf_pos(pos_i)))):
@@ -129,19 +129,21 @@ def heuristic(board):
 	for i in range(board_size_l(board)-1):
 		for j in range(board_size_c(board)-1):
 			if (is_peg(board_pos_cont(board, make_pos(i,j)))):
-				dist += distance(make_pos(i,j), (0,0))
+				dist += distance(make_pos(i,j), (0,0)) #porque e que vemos a distancia ao (0,0) se o 
+													   #objetivo e que fique so uma peca, no matter where?
 	return dist
 
-
+def distance(pos1, pos2):
+	return math.sqrt(((pos_l(pos2) - pos_l(pos1))**2) + ((pos_c(pos2) - pos_c(pos2))**2))
 
 class sol_state:
 	__slots__ = ['board']
+
 	def __init__(self, board):
 		self.board = board
 
 	def __lt__(self, other_sol_state):
 		return board_num_pegs(self.board) < board_num_pegs(other_sol_state.board)
-
 
 
 class solitaire(Problem):
@@ -152,7 +154,6 @@ class solitaire(Problem):
 
 	def actions(self, state):
 		return board_moves(state.board)
-
 
 	def result(self, state, action):
 		return board_perform_move(state.board, action)
@@ -165,3 +166,4 @@ class solitaire(Problem):
 	
 	def h(self, node):
 		return heuristic(node.state.board)
+
