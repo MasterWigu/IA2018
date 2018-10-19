@@ -1,5 +1,7 @@
+#Catarina Pedreira - 87524 / Miguel Oliveira - 87689
+
+
 import copy
-import math
 from search import *
 
 # TAI content
@@ -26,10 +28,10 @@ def pos_l (pos):
 def pos_c (pos):
 	return pos[1]
 
-def valid_pos(pos):
-	if (pos_l(pos) < 0 or pos_c(pos) < 0):
-		return False
-	return True
+def valid_pos(board, pos):
+	if (pos_l(pos) >= 0 and pos_c(pos) >= 0 and pos_l(pos)< board_size_l(board) and pos_c(pos) < board_size_c(board)):
+		return True
+	return False
 
 def lf_pos(pos):
 	return make_pos(pos_l(pos), pos_c(pos)-1)
@@ -50,7 +52,7 @@ def move_final (move):
 	return move[1]
 
 def dif_move(move):
-	return (pos_l(move_final(move)) - pos_l(move_initial(move)), pos_c(move_final(move)) - pos_c(move_initial(move)))
+	return (pos_l(move_final(move))-pos_l(move_initial(move)), pos_c(move_final(move))-pos_c(move_initial(move)))
 
 
 # TAI board
@@ -73,21 +75,22 @@ def board_is_blocked(board, pos):
 
 def board_moves(board):
 	moves = []
-	for i in range(board_size_l(board)-1):
-		for j in range(board_size_c(board)-1):
+	for i in range(board_size_l(board)):
+		for j in range(board_size_c(board)):
+
 			pos_i = make_pos(i,j)
 			if board_is_peg(board, pos_i):
-				if (board_is_peg(board, lf_pos(pos_i)) and board_is_empty(board, lf_pos(lf_pos(pos_i)))):
-					if (valid_pos(lf_pos(lf_pos(pos_i)))):
+				if (valid_pos(board, lf_pos(lf_pos(pos_i)))):
+					if (board_is_peg(board, lf_pos(pos_i)) and board_is_empty(board, lf_pos(lf_pos(pos_i)))):
 						moves += [make_move(pos_i, lf_pos(lf_pos(pos_i)))]
-				if (board_is_peg(board, rg_pos(pos_i)) and board_is_empty(board, rg_pos(rg_pos(pos_i)))):
-					if (valid_pos(rg_pos(rg_pos(pos_i)))):
+				if (valid_pos(board, rg_pos(rg_pos(pos_i)))):
+					if (board_is_peg(board, rg_pos(pos_i)) and board_is_empty(board, rg_pos(rg_pos(pos_i)))):
 						moves += [make_move(pos_i, rg_pos(rg_pos(pos_i)))]
-				if (board_is_peg(board, up_pos(pos_i)) and board_is_empty(board, up_pos(up_pos(pos_i)))):
-					if (valid_pos(up_pos(up_pos(pos_i)))):
+				if (valid_pos(board, up_pos(up_pos(pos_i)))):
+					if (board_is_peg(board, up_pos(pos_i)) and board_is_empty(board, up_pos(up_pos(pos_i)))):
 						moves += [make_move(pos_i, up_pos(up_pos(pos_i)))]
-				if (board_is_peg(board, dn_pos(pos_i)) and board_is_empty(board, dn_pos(dn_pos(pos_i)))):
-					if (valid_pos(dn_pos(dn_pos(pos_i)))):
+				if (valid_pos(board, dn_pos(dn_pos(pos_i)))):
+					if (board_is_peg(board, dn_pos(pos_i)) and board_is_empty(board, dn_pos(dn_pos(pos_i)))):
 						moves += [make_move(pos_i, dn_pos(dn_pos(pos_i)))]
 	return moves
 
@@ -129,34 +132,33 @@ def heuristic(board):
 	for i in range(board_size_l(board)-1):
 		for j in range(board_size_c(board)-1):
 			if (is_peg(board_pos_cont(board, make_pos(i,j)))):
-				dist += distance(make_pos(i,j), (0,0)) #porque e que vemos a distancia ao (0,0) se o 
-													   #objetivo e que fique so uma peca, no matter where?
+				dist += distance(make_pos(i,j), (0,0))
 	return dist
 
-def distance(pos1, pos2):
-	return math.sqrt(((pos_l(pos2) - pos_l(pos1))**2) + ((pos_c(pos2) - pos_c(pos2))**2))
+
 
 class sol_state:
-	__slots__ = ['board']
-
+	__slots__ = 'board'
 	def __init__(self, board):
 		self.board = board
 
 	def __lt__(self, other_sol_state):
-		return board_num_pegs(self.board) < board_num_pegs(other_sol_state.board)
+		return board_num_pegs(self.board) > board_num_pegs(other_sol_state.board)
+
 
 
 class solitaire(Problem):
 	"""Models a Solitaire problem as a satisfaction problem.
 	A solution cannot have more than 1 peg left on the board."""
 	def __init__(self, board):
-		self.board = board
+		self.initial = sol_state(board)
 
 	def actions(self, state):
 		return board_moves(state.board)
 
+
 	def result(self, state, action):
-		return board_perform_move(state.board, action)
+		return sol_state(board_perform_move(state.board, action))
 
 	def goal_test(self, state):
 		return board_is_goal(state.board)
@@ -166,4 +168,3 @@ class solitaire(Problem):
 	
 	def h(self, node):
 		return heuristic(node.state.board)
-
