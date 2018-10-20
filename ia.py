@@ -120,20 +120,23 @@ def board_is_goal(board):
 
 def board_num_pegs(board):
 	pegs = 0
-	for i in range(board_size_l(board)-1):
-		for j in range(board_size_c(board)-1):
+	for i in range(board_size_l(board)):
+		for j in range(board_size_c(board)):
 			if (is_peg(board_pos_cont(board, make_pos(i,j)))):
 				pegs+=1
 	return pegs
 
-
+'''
 def heuristic(board):
 	dist = 0
 	for i in range(board_size_l(board)-1):
 		for j in range(board_size_c(board)-1):
 			if (is_peg(board_pos_cont(board, make_pos(i,j)))):
-				dist += distance(make_pos(i,j), (0,0))
-	return dist
+				dist += distance(make_pos(i,j), (board_size_l(board)/2,board_size_c(board)/2))
+	return -dist
+	'''
+def heuristic(board):
+	return board_moves(board)
 
 
 
@@ -148,8 +151,6 @@ class sol_state:
 
 
 class solitaire(Problem):
-	"""Models a Solitaire problem as a satisfaction problem.
-	A solution cannot have more than 1 peg left on the board."""
 	def __init__(self, board):
 		self.initial = sol_state(board)
 
