@@ -1,6 +1,5 @@
 #Catarina Pedreira - 87524 / Miguel Oliveira - 87689
 
-
 import copy
 from search import *
 
@@ -125,63 +124,18 @@ def board_num_pegs(board):
 			if (is_peg(board_pos_cont(board, make_pos(i,j)))):
 				pegs+=1
 	return pegs
-'''
-def heuristic(board):
-	dist = 0
-	for i in range(board_size_l(board)):
-		for j in range(board_size_c(board)):
-			if (is_peg(board_pos_cont(board, make_pos(i,j)))):
-				dist += distance(make_pos(i,j), (board_size_l(board)/2,board_size_c(board)/2))
-	return dist
-'''
-
-'''
-def heuristic(board):
-	return board_moves(board)
-
 
 def heuristic(board):
 	moves = board_moves(board)
-
-	#if len(moves)==0:
-	
-	#	return float('inf')
 
 	pegs_move = []
 	for i in moves:
 		pegs_move.append(i[0])
 
 	numPegsMove = len(set(pegs_move))
-
 	totalPegs = board_num_pegs(board)
 
-	return totalPegs - 1 - (numPegsMove/totalPegs)
-
-
-def heuristic(board):
-	moves = len(board_moves(board))
-
-	#if moves==0:
-	#	return float('inf')
-
-	totalPegs = board_num_pegs(board)
-
-	return totalPegs - 1 - (1/(moves+1))
-'''
-
-def heuristic(board):
-	dist = 0
-	pegs = 0
-
-	for i in range(board_size_l(board)):
-		for j in range(board_size_c(board)):
-			if (is_peg(board_pos_cont(board, make_pos(i,j)))):
-				pegs+=1
-				for k in range(board_size_l(board)):
-					for l in range(board_size_c(board)):
-						if (is_peg(board_pos_cont(board, make_pos(i,j)))):
-							dist += abs(i-k)+abs(j-l)
-	return dist / (2*pegs)
+	return totalPegs + (totalPegs - numPegsMove)
 
 class sol_state:
 	__slots__ = 'board'
