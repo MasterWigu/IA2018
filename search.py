@@ -15,6 +15,7 @@ import math
 import random
 import sys
 import bisect
+import time
 
 infinity = float('inf')
 
@@ -1308,9 +1309,12 @@ def compare_searchers(problems, header,
                                  depth_limited_search,
                                  recursive_best_first_search]):
     def do(searcher, problem):
+        print('aaaa')
         p = InstrumentedProblem(problem)
+        start_time = time.perf_counter_ns()
         searcher(p)
-        return p
+        end_time = time.perf_counter_ns()
+        return (p , str((end_time - start_time)/1000000000)+'s')
     table = [[name(s)] + [do(s, p) for p in problems] for s in searchers]
     print_table(table, header)
 
