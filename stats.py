@@ -1,5 +1,5 @@
 from search import *
-from solitaire import *
+from ia import *
 
 t1 = [["_","O","O","O","_"], ["O","_","O","_","O"], ["_","O","_","O","_"], ["O","_","O","_","_"],["_","O","_","_","_"]]
 t2 = [["O","O","O","X"], ["O","O","O","O"], ["O","_","O","O"], ["O","O","O","O"]]
@@ -20,8 +20,7 @@ def compare_merdas():
                                 solitaire(t4)],
                       header=['Searcher', 't1',
                               't2', 't3', 't4'],
-    				   searchers=[depth_first_tree_search,
-                                 greedy_search,
+    				   searchers=[ greedy_search,
                                  astar_search])
 
 

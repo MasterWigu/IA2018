@@ -112,15 +112,10 @@ def board_perform_move(board, move):
 	return board_new
 
 
-def board_is_goal(board):
-	pegs = 0
-	for i in range(board_size_l(board)):
-		for j in range(board_size_c(board)):
-			if (is_peg(board_pos_cont(board, make_pos(i,j)))):
-				pegs += 1
-			if (pegs > 1):
-				return False
-	return True
+def board_is_goal(state):
+	if (state.numPegs == 1):
+		return True
+	return False
 
 def board_num_pegs(board):
 	pegs = 0
@@ -130,48 +125,50 @@ def board_num_pegs(board):
 				pegs+=1
 	return pegs
 
-
-	
-
-def heuristic(board):
-	moves = board_moves(board)
+def heuristic(state):
+	moves = board_moves(state.board)
 
 	pegs_move = []
 	for i in moves:
 		pegs_move.append(move_initial(i))
 
 	numPegsMove = len(set(pegs_move))
-	totalPegs = board_num_pegs(board)
 
-	return totalPegs + (totalPegs - numPegsMove)
+	return state.numPegs + (state.numPegs - numPegsMove)
+
 
 class sol_state:
-	__slots__ = 'board'
-	def __init__(self, board):
+	def __init__(self, board, pegs = -1):
+		if (pegs == -1):
+			self.numPegs = board_num_pegs(board)
+		else:
+			self.numPegs = pegs
 		self.board = board
 
 	def __lt__(self, other_sol_state):
-		return board_num_pegs(self.board) > board_num_pegs(other_sol_state.board)
+		return self.numPegs > other_sol_state.numPegs
 
 
 
 
 class solitaire(Problem):
 	def __init__(self, board):
-		self.initial = sol_state(board)
+		self.initial = sol_state(board, board_num_pegs(board))
 
 	def actions(self, state):
 		return board_moves(state.board)
 
 
 	def result(self, state, action):
-		return sol_state(board_perform_move(state.board, action))
+		return sol_state(board_perform_move(state.board, action), state.numPegs - 1)
 
 	def goal_test(self, state):
-		return board_is_goal(state.board)
+		if (state.numPegs == 1):
+			return True
+		return False
 
 	def path_cost(self, c, state1, action, state2):
 		return c + 1
 	
 	def h(self, node):
-		return heuristic(node.state.board)
+		return heuristic(node.state)
